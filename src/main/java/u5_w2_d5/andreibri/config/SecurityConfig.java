@@ -7,22 +7,33 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final TokenFilter tokenFilter;
+
+    public SecurityConfig(TokenFilter tokenFilter) {
+        this.tokenFilter = tokenFilter;
+    }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 
-        httpSecurity.sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        httpSecurity.formLogin(formLogin -> formLogin.disable());
+        httpSecurity.sessionManagement(sessions ->
+                sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         httpSecurity.csrf(csrf -> csrf.disable());
+        httpSecurity.formLogin(formLogin -> formLogin.disable());
 
-        httpSecurity.authorizeHttpRequests(req -> req.requestMatchers("/**").permitAll());
+        httpSecurity.authorizeHttpRequests(req -> req
+                .requestMatchers("/auth/login").permitAll()
+                .anyRequest().authenticated()
+        );
 
+        httpSecurity.addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
