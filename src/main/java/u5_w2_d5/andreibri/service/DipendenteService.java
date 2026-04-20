@@ -72,6 +72,12 @@ public class DipendenteService {
     }
 
 
+    public Dipendente findEntityByEmail(String email) {
+        return dipendenteRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Dipendente con email " + email + " non trovato"));
+    }
+
+
     @Transactional
     public DipendenteResponseDTO update(Long id, DipendenteRequestDTO dto) {
         Dipendente d = dipendenteRepository.findById(id)
@@ -129,6 +135,7 @@ public class DipendenteService {
         return dipendenteRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Dipendente con id " + id + " non trovato"));
     }
+
 
     // Mapper entity -> DTO
     public DipendenteResponseDTO toDTO(Dipendente d) {
